@@ -26,8 +26,13 @@ public class PlayerInputHandler : MonoBehaviour
     private bool crouch;
     public bool Crouch => crouch;
 
+    private bool dash;
+    public bool Dash => dash;
+
     public event Action CrouchEvent;
     public event Action UncrouchEvent;
+    public event Action DashEvent;
+
 
     public void HandleMove(InputAction.CallbackContext ctx)
     {
@@ -45,13 +50,17 @@ public class PlayerInputHandler : MonoBehaviour
         else if (ctx.canceled) jump = false;
     }
 
-    public void HandleSprint(InputAction.CallbackContext ctx)
+    public void HandleDash(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
         {
-            sprint = true;
+            dash = true;
+            DashEvent?.Invoke();
         }
-        else if (ctx.canceled) sprint = false;
+        else if (ctx.canceled)
+        {
+            dash = false;
+        }
     }
 
     public void HandleCrouch(InputAction.CallbackContext ctx)

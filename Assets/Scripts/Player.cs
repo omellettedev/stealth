@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
+
 
 // ----- BASED ON STARTER ASSET ThirdPersonController.cs -----
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
@@ -18,9 +20,6 @@ public class Player : MonoBehaviour
 
     [Tooltip("Move speed of the character in m/s")]
     public float MoveSpeed = 2.0f;
-
-    [Tooltip("Sprint speed of the character in m/s")]
-    public float SprintSpeed = 5.335f;
 
     [Tooltip("Crouch speed of the character in m/s")]
     [SerializeField] private float crouchSpeed = 1.0f;
@@ -54,6 +53,16 @@ public class Player : MonoBehaviour
     // the method will calculate the crouch center and height based on this metric and the base center and height
     [Tooltip("The crouching height proportion (crouch height / normal height)")]
     [SerializeField] private float crouchProportion = 0.7f;
+
+    [Header("Dash")]
+    public float dashSpeed = 15f;
+    public float dashDuration = 0.25f;
+    public float dashCooldown = 1f;
+
+    private bool canDash = true;
+    private bool isDashing = false;
+
+
 
     [Header("Player Grounded")]
     [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
@@ -168,6 +177,10 @@ public class Player : MonoBehaviour
         GroundedCheck();
         CheckUncrouch();
         Move();
+        if (_input.Dash && canDash && !isDashing && Grounded)
+        {
+            StartCoroutine(Dash());
+        }
     }
 
     private void LateUpdate()
@@ -206,7 +219,7 @@ public class Player : MonoBehaviour
         {
             //Don't multiply mouse input by Time.deltaTime;
             float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
-
+            deltaTimeMultiplier *= 3;
             _cinemachineTargetYaw += _input.Look.x * deltaTimeMultiplier;
             _cinemachineTargetPitch += _input.Look.y * deltaTimeMultiplier;
         }
@@ -223,13 +236,15 @@ public class Player : MonoBehaviour
     private void Move()
     {
         // set target speed
-        float targetSpeed = (_input.Crouch || tryingToUncrouch) ? crouchSpeed : (_input.Sprint ? SprintSpeed : MoveSpeed);
+        float targetSpeed = (_input.Crouch || tryingToUncrouch) ? crouchSpeed : MoveSpeed;
 
         // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
         // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
         // if there is no input, set the target speed to 0
         if (_input.Movement == Vector2.zero) targetSpeed = 0.0f;
+
+        if (isDashing) return;
 
         // a reference to the players current horizontal velocity
         float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
@@ -385,6 +400,26 @@ public class Player : MonoBehaviour
             _controller.height = defaultHeight;
         }
     }
+
+    private IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+
+        float startTime = Time.time;
+        Vector3 dashDirection = transform.forward;
+
+        while (Time.time < startTime + dashDuration)
+        {
+            _controller.Move(dashDirection * dashSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        isDashing = false;
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
+    }
+
 
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
     {

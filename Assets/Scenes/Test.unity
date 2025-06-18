@@ -2426,7 +2426,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6982812147933622149}
         m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
-        m_MethodName: HandleSprint
+        m_MethodName: HandleDash
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3181,7 +3181,6 @@ MonoBehaviour:
   defaultCenter: {x: 0, y: 0.93, z: 0}
   defaultHeight: 1.8
   MoveSpeed: 3
-  SprintSpeed: 6
   crouchSpeed: 1
   RotationSmoothTime: 0.12
   SpeedChangeRate: 10
@@ -3203,6 +3202,9 @@ MonoBehaviour:
   JumpTimeout: 0.3
   FallTimeout: 0.15
   crouchProportion: 0.7
+  dashSpeed: 15
+  dashDuration: 0.25
+  dashCooldown: 1
   Grounded: 1
   GroundedOffset: -0.14
   GroundedRadius: 0.28
