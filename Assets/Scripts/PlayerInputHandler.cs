@@ -34,6 +34,9 @@ public class PlayerInputHandler : MonoBehaviour
     public event Action DashEvent;
 
 
+    public event Action InteractEvent;
+    public event Action UninteractEvent;
+
     public void HandleMove(InputAction.CallbackContext ctx)
     {
         movement = ctx.ReadValue<Vector2>();
@@ -80,5 +83,17 @@ public class PlayerInputHandler : MonoBehaviour
     private void OnApplicationFocus(bool focus)
     {
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    public void HandleInteract(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            InteractEvent?.Invoke();
+        }
+        else if (ctx.canceled)
+        {
+            UninteractEvent?.Invoke();
+        }
     }
 }

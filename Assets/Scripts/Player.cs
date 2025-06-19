@@ -49,11 +49,6 @@ public class Player : MonoBehaviour
     [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
     public float FallTimeout = 0.15f;
 
-    [Space(10)]
-    // the method will calculate the crouch center and height based on this metric and the base center and height
-    [Tooltip("The crouching height proportion (crouch height / normal height)")]
-    [SerializeField] private float crouchProportion = 0.7f;
-
     [Header("Dash")]
     public float dashSpeed = 15f;
     public float dashDuration = 0.25f;
@@ -134,12 +129,32 @@ public class Player : MonoBehaviour
         }
     }
 
-    [Space(10)]
+    [Header("Crouch")]
     [Tooltip("Solid object layers (for uncrouch detection)")]
     [SerializeField] private LayerMask solidLayers;
 
+    // the method will calculate the crouch center and height based on this metric and the base center and height
+    [Tooltip("The crouching height proportion (crouch height / normal height)")]
+    [SerializeField] private float crouchProportion = 0.7f;
+
+    [Tooltip("Player Render GameObject")]
+    [SerializeField] private GameObject playerRender;
+
     // trying to uncrouch
     private bool tryingToUncrouch = false;
+
+    // the solid object the player is looking at
+    private GameObject objectLookingAt;
+
+    [Header("Interaction")]
+    [Tooltip("Interaction range")]
+    [SerializeField] private float interactionRange = 5;
+
+    [Tooltip("Solid + interactable object layers (for interaction)")]
+    [SerializeField] private LayerMask solidAndInteractableLayers;
+
+    [Tooltip("Player chest object")]
+    [SerializeField] private GameObject playerChest;
 
     private void Awake()
     {
@@ -161,6 +176,8 @@ public class Player : MonoBehaviour
 
         _input.CrouchEvent += Crouch;
         _input.UncrouchEvent += Uncrouch;
+        _input.InteractEvent += Interact;
+        _input.UninteractEvent += Uninteract;
 
         AssignAnimationIDs();
 
@@ -231,6 +248,8 @@ public class Player : MonoBehaviour
         // Cinemachine will follow this target
         CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
             _cinemachineTargetYaw, 0.0f);
+
+        CheckLook();
     }
 
     private void Move()
@@ -376,15 +395,14 @@ public class Player : MonoBehaviour
     {
         tryingToUncrouch = false;
         // keeps the base the same
-        _controller.center = new Vector3(defaultCenter.x, defaultCenter.y - (0.15f * defaultHeight), defaultCenter.z);
-        _controller.height = 0.7f * defaultHeight;
+        _controller.center = new Vector3(defaultCenter.x, defaultCenter.y - (0.5f * (1 - crouchProportion) * defaultHeight), defaultCenter.z);
+        _controller.height = crouchProportion * defaultHeight;
+        playerRender.transform.localScale = new Vector3(1, crouchProportion, 1);
     }
 
     private void Uncrouch()
     {
         tryingToUncrouch = true;
-        //_controller.center = defaultCenter;
-        //_controller.height = defaultHeight;
     }
 
     private void CheckUncrouch()
@@ -398,6 +416,7 @@ public class Player : MonoBehaviour
             tryingToUncrouch = false;
             _controller.center = defaultCenter;
             _controller.height = defaultHeight;
+            playerRender.transform.localScale = new Vector3(1, 1, 1);
         }
     }
 
@@ -459,6 +478,60 @@ public class Player : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.5f)
         {
             AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+        }
+    }
+
+    private void CheckLook()
+    {
+        Vector3 playerChestPosition = playerChest.transform.position;
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, solidAndInteractableLayers) // get what a raycast from the camera hits
+            && (Vector3.Distance(playerChestPosition, hit.point) < interactionRange) // check if the hit is within interaction range
+            && (Vector3.Dot(transform.forward, hit.point - playerChestPosition) > 0)) // check if the hit is in front of the player
+        {
+            bool somethingInBetween = Physics.Linecast(playerChestPosition, hit.point, out RaycastHit rangeHit, solidAndInteractableLayers); // check if there is something in between the player and the hit point
+            if (!somethingInBetween || rangeHit.collider == hit.collider) // if nothing in between or the object in between is the target
+            {
+                GameObject target = hit.collider.gameObject;
+                if (objectLookingAt != target)
+                {
+                    if (objectLookingAt != null) { LookAwayFromObject(); }
+                    objectLookingAt = target;
+                    if (target.TryGetComponent(out IInteractable interactable))
+                    {
+                        interactable.OnLookAt();
+                    }
+                }
+            }
+            else if (objectLookingAt != null) {
+                LookAwayFromObject();
+            }
+        }
+        else if (objectLookingAt != null) { LookAwayFromObject(); }
+    }
+
+    private void LookAwayFromObject()
+    {
+        if (objectLookingAt.TryGetComponent(out IInteractable interactable))
+        {
+            interactable.OnLookAway();
+        }
+        objectLookingAt = null;
+    }
+
+    void Interact()
+    {
+        if (objectLookingAt != null && objectLookingAt.TryGetComponent(out IInteractable interactable))
+        {
+            interactable.OnInteract();
+        }
+    }
+
+    void Uninteract()
+    {
+        if (objectLookingAt != null && objectLookingAt.TryGetComponent(out IInteractable interactable))
+        {
+            interactable.OnUninteract();
         }
     }
 }
