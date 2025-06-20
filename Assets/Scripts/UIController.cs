@@ -39,4 +39,10 @@ public class UIController : MonoBehaviour
         interactionSlider.gameObject.SetActive(false);
         interactionSlider.value = 0;
     }
+
+    public void CancelInteraction()
+    {
+        interactionSlider.gameObject.SetActive(false);
+        interactionSlider.value = 0;
+    }
 }

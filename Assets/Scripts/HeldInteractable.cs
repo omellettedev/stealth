@@ -40,6 +40,7 @@ public abstract class HeldInteractable : MonoBehaviour, IInteractable
         {
             interactionTimeLeft = 0;
         }
+        UIController.Instance.CancelInteraction();
         InteractionUpdateEvent -= UIController.Instance.SetInteractionValue;
     }
 
