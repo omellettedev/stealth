@@ -37,6 +37,9 @@ public class PlayerInputHandler : MonoBehaviour
     public event Action InteractEvent;
     public event Action UninteractEvent;
 
+    public event Action<int> ItemEvent;
+    public event Action DropItemEvent;
+
     public void HandleMove(InputAction.CallbackContext ctx)
     {
         movement = ctx.ReadValue<Vector2>();
@@ -95,5 +98,50 @@ public class PlayerInputHandler : MonoBehaviour
         {
             UninteractEvent?.Invoke();
         }
+    }
+
+    public void HandleItem1(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(1);
+    }
+
+    public void HandleItem2(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(2);
+    }
+
+    public void HandleItem3(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(3);
+    }
+
+    public void HandleItem4(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(4);
+    }
+
+    public void HandleItem5(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(5);
+    }
+
+    public void HandleItem6(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(6);
+    }
+
+    public void HandleItem7(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(7);
+    }
+
+    public void HandleItem8(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) ItemEvent?.Invoke(8);
+    }
+
+    public void HandleDrop(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) DropItemEvent?.Invoke();
     }
 }

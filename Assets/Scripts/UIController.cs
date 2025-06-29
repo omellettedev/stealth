@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class UIController : MonoBehaviour
 {
@@ -7,6 +8,11 @@ public class UIController : MonoBehaviour
     public static UIController Instance => instance;
 
     [SerializeField] private Slider interactionSlider;
+    private List<InventorySlotUI> inventorySlots = new List<InventorySlotUI>();
+    [SerializeField] private GameObject inventoryCenter;
+    [SerializeField] private float inventorySlotSpacing = 10f;
+    private float inventoryCenterSpacing;
+    private InventorySlotUI selectedSlot;
 
     private void Awake()
     {
@@ -16,7 +22,11 @@ public class UIController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        inventoryCenterSpacing = LoadedPrefabs.Instance.InventorySlotPrefab.GetComponent<RectTransform>().sizeDelta.x + inventorySlotSpacing;
 
+        Player.Instance.PickedUpItemEvent += AddInventorySlot;
+        Player.Instance.LostItemEvent += RemoveInventorySlot;
+        Player.Instance.SelectedItemEvent += SelectInventorySlot;
     }
 
     // Update is called once per frame
@@ -44,5 +54,47 @@ public class UIController : MonoBehaviour
     {
         interactionSlider.gameObject.SetActive(false);
         interactionSlider.value = 0;
+    }
+
+    public void UpdateInventorySlotPositions()
+    {
+        float inventoryCount = inventorySlots.Count;
+        for (int i = 0; i < inventoryCount; i++)
+        {
+            RectTransform slotRect = inventorySlots[i].GetComponent<RectTransform>();
+            // this ensures that the slots are centered around the inventory center
+            float x = (i - ((inventoryCount - 1) / 2)) * inventoryCenterSpacing;
+            slotRect.anchoredPosition = new Vector2(x, slotRect.anchoredPosition.y);
+        }
+    }
+
+    public void AddInventorySlot()
+    {
+        GameObject newSlot = Instantiate(LoadedPrefabs.Instance.InventorySlotPrefab, inventoryCenter.transform);
+        InventorySlotUI slotUI = newSlot.GetComponent<InventorySlotUI>();
+        inventorySlots.Add(slotUI);
+        UpdateInventorySlotPositions();
+    }
+
+    public void RemoveInventorySlot(int index)
+    {
+        if (index < 0 || index >= inventorySlots.Count) return; // Check for valid index
+        InventorySlotUI slotToRemove = inventorySlots[index];
+        inventorySlots.RemoveAt(index);
+        Destroy(slotToRemove.gameObject);
+        UpdateInventorySlotPositions();
+    }
+
+    // TEMPORARY IMPLEMENTATION
+    public void SelectInventorySlot(int prevIndex, int index)
+    {
+        if (prevIndex >= 0 && prevIndex < inventorySlots.Count)
+        {
+            InventorySlotUI prevSlot = inventorySlots[prevIndex];
+            prevSlot.GetComponent<Image>().color = Color.white; // Reset previous slot color
+        }
+        if (index < 0 || index >= inventorySlots.Count) return; // Check for valid index
+        InventorySlotUI slotToSelect = inventorySlots[index];
+        slotToSelect.GetComponent<Image>().color = Color.green;
     }
 }

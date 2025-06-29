@@ -1,20 +1,28 @@
 using UnityEngine;
 
-public class TestInteractable : HeldInteractable
+public class ItemInteractable : InstantInteractable
 {
     private Color baseColor;
     private Renderer rend;
+    [SerializeField] private Item item;
+
+    public override void TriggerInteractionEffect()
+    {
+        base.TriggerInteractionEffect();
+        Player.Instance.TryPickupItem(item);
+        Destroy(gameObject);
+    }
 
     private void Start()
     {
         rend = GetComponent<Renderer>();
         baseColor = rend.material.GetColor("_BaseColor");
+        Initialize(new Item("Default Item")); // TEMPORARY, REPLACE WITH ACTUAL ITEM INITIALIZATION
     }
 
-    public override void TriggerInteractionEffect()
+    public void Initialize(Item item)
     {
-        base.TriggerInteractionEffect();
-        Destroy(gameObject);
+        this.item = item;
     }
 
     public override void OnLookAt()
@@ -27,13 +35,5 @@ public class TestInteractable : HeldInteractable
     {
         base.OnLookAway();
         rend.material.SetColor("_BaseColor", baseColor);
-    }
-
-    public override void OnInteract()
-    {
-        if (Player.Instance.HeldItem != null)
-        {
-            base.OnInteract();
-        }
     }
 }

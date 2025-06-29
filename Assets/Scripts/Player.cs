@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 
 
 // ----- BASED ON STARTER ASSET ThirdPersonController.cs -----
@@ -10,6 +12,8 @@ using System.Collections;
 [RequireComponent(typeof(PlayerInput))]
 public class Player : MonoBehaviour
 {
+    public static Player Instance { get; private set; }
+
     [Header("Player")]
     [Space(10)]
     [Tooltip("The default relative position of the center of the player hitbox capsule, relative to feet")]
@@ -57,8 +61,6 @@ public class Player : MonoBehaviour
     private bool canDash = true;
     private bool isDashing = false;
 
-
-
     [Header("Player Grounded")]
     [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
     public bool Grounded = true;
@@ -87,6 +89,11 @@ public class Player : MonoBehaviour
 
     [Tooltip("For locking the camera position on all axis")]
     public bool LockCameraPosition = false;
+
+    [Space(10)]
+    [Header("Stats")]
+    [Tooltip("The player's max inventory size")]
+    [SerializeField] private int maxInventorySize = 8;
 
     // cinemachine
     private float _cinemachineTargetYaw;
@@ -156,8 +163,25 @@ public class Player : MonoBehaviour
     [Tooltip("Player chest object")]
     [SerializeField] private GameObject playerChest;
 
+    // player inventory
+    private List<Item> inventory = new List<Item>();
+    private int currentItemIndex = -1; // -1 means no item selected
+    public Item HeldItem => (currentItemIndex >= 0 && currentItemIndex < inventory.Count) ? inventory[currentItemIndex] : null;
+
+    public event Action PickedUpItemEvent;
+    public event Action<int> LostItemEvent;
+    public event Action<int, int> SelectedItemEvent;
+
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         // get a reference to our main camera
         if (_mainCamera == null)
         {
@@ -178,6 +202,8 @@ public class Player : MonoBehaviour
         _input.UncrouchEvent += Uncrouch;
         _input.InteractEvent += Interact;
         _input.UninteractEvent += Uninteract;
+        _input.ItemEvent += (i) => SelectItem(i - 1);
+        _input.DropItemEvent += DropItem;
 
         AssignAnimationIDs();
 
@@ -467,7 +493,7 @@ public class Player : MonoBehaviour
         {
             if (FootstepAudioClips.Length > 0)
             {
-                var index = Random.Range(0, FootstepAudioClips.Length);
+                var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
                 AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
             }
         }
@@ -533,5 +559,39 @@ public class Player : MonoBehaviour
         {
             interactable.OnUninteract();
         }
+    }
+
+    void SelectItem(int index)
+    {
+        int previousItemIndex = currentItemIndex; // store previous item index for event
+        if (index < -1 || index >= inventory.Count)
+        {
+            if (currentItemIndex != -1)
+            {
+                Uninteract(); // stop interacting with the current object if any
+            }
+            currentItemIndex = -1; // invalid index, deselect item
+            SelectedItemEvent?.Invoke(previousItemIndex, currentItemIndex);
+            return;
+        }
+        if (currentItemIndex == index) return; // already selected
+        currentItemIndex = index;
+        SelectedItemEvent?.Invoke(previousItemIndex, currentItemIndex);
+        Uninteract(); // stop interacting with the current object if any
+    }
+
+    void DropItem()
+    {
+        if (currentItemIndex == -1) return; // no item selected
+        inventory.RemoveAt(currentItemIndex);
+        LostItemEvent?.Invoke(currentItemIndex);
+        currentItemIndex = -1;
+    }
+
+    public void TryPickupItem(Item item)
+    {
+        if (inventory.Count >= maxInventorySize) return; // inventory is full
+        inventory.Add(item);
+        PickedUpItemEvent?.Invoke();
     }
 }
