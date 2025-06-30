@@ -1,12 +1,20 @@
 using UnityEngine;
 
-public class Item
+public abstract class Item
 {
     private string itemName;
     public string ItemName => itemName;
 
-    public Item(string name)
+    private string itemDescription;
+    public string ItemDescription => itemDescription;
+
+    private Sprite itemIcon;
+    public Sprite ItemIcon => itemIcon;
+
+    public Item(string name, string description, Sprite icon)
     {
         itemName = name;
+        itemDescription = description;
+        itemIcon = icon;
     }
 }

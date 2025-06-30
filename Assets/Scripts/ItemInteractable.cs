@@ -4,7 +4,8 @@ public class ItemInteractable : InstantInteractable
 {
     private Color baseColor;
     private Renderer rend;
-    [SerializeField] private Item item;
+    [SerializeField] private ItemData startingData;
+    private Item item;
 
     public override void TriggerInteractionEffect()
     {
@@ -17,12 +18,10 @@ public class ItemInteractable : InstantInteractable
     {
         rend = GetComponent<Renderer>();
         baseColor = rend.material.GetColor("_BaseColor");
-        Initialize(new Item("Default Item")); // TEMPORARY, REPLACE WITH ACTUAL ITEM INITIALIZATION
-    }
-
-    public void Initialize(Item item)
-    {
-        this.item = item;
+        if (startingData != null)
+        {
+            item = startingData.CreateItem();
+        }
     }
 
     public override void OnLookAt()

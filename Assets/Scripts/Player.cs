@@ -168,7 +168,7 @@ public class Player : MonoBehaviour
     private int currentItemIndex = -1; // -1 means no item selected
     public Item HeldItem => (currentItemIndex >= 0 && currentItemIndex < inventory.Count) ? inventory[currentItemIndex] : null;
 
-    public event Action PickedUpItemEvent;
+    public event Action<Sprite> PickedUpItemEvent;
     public event Action<int> LostItemEvent;
     public event Action<int, int> SelectedItemEvent;
 
@@ -592,6 +592,6 @@ public class Player : MonoBehaviour
     {
         if (inventory.Count >= maxInventorySize) return; // inventory is full
         inventory.Add(item);
-        PickedUpItemEvent?.Invoke();
+        PickedUpItemEvent?.Invoke(item.ItemIcon);
     }
 }

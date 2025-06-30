@@ -31,7 +31,7 @@ public class TestInteractable : HeldInteractable
 
     public override void OnInteract()
     {
-        if (Player.Instance.HeldItem != null)
+        if (Player.Instance.HeldItem != null && Player.Instance.HeldItem.ItemName == "Wrench")
         {
             base.OnInteract();
         }

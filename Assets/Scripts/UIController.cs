@@ -22,7 +22,7 @@ public class UIController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        inventoryCenterSpacing = LoadedPrefabs.Instance.InventorySlotPrefab.GetComponent<RectTransform>().sizeDelta.x + inventorySlotSpacing;
+        inventoryCenterSpacing = Manager.Instance.LoadedPrefabs.InventorySlotPrefab.GetComponent<RectTransform>().sizeDelta.x + inventorySlotSpacing;
 
         Player.Instance.PickedUpItemEvent += AddInventorySlot;
         Player.Instance.LostItemEvent += RemoveInventorySlot;
@@ -68,10 +68,11 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void AddInventorySlot()
+    public void AddInventorySlot(Sprite itemIcon)
     {
-        GameObject newSlot = Instantiate(LoadedPrefabs.Instance.InventorySlotPrefab, inventoryCenter.transform);
+        GameObject newSlot = Instantiate(Manager.Instance.LoadedPrefabs.InventorySlotPrefab, inventoryCenter.transform);
         InventorySlotUI slotUI = newSlot.GetComponent<InventorySlotUI>();
+        slotUI.SetImage(itemIcon);
         inventorySlots.Add(slotUI);
         UpdateInventorySlotPositions();
     }
@@ -91,10 +92,10 @@ public class UIController : MonoBehaviour
         if (prevIndex >= 0 && prevIndex < inventorySlots.Count)
         {
             InventorySlotUI prevSlot = inventorySlots[prevIndex];
-            prevSlot.GetComponent<Image>().color = Color.white; // Reset previous slot color
+            prevSlot.DeselectSlot(); // Reset previous slot color
         }
         if (index < 0 || index >= inventorySlots.Count) return; // Check for valid index
         InventorySlotUI slotToSelect = inventorySlots[index];
-        slotToSelect.GetComponent<Image>().color = Color.green;
+        slotToSelect.SelectSlot();
     }
 }

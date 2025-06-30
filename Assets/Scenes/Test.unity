@@ -822,6 +822,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemPrefab (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 2777089818643332705, guid: 24912c833896c184c8ae98c49dbdc2f7, type: 3}
+      propertyPath: startingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 2f1df4f447b2eb141a452c7748eb897f, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -987,6 +991,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemPrefab (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 2777089818643332705, guid: 24912c833896c184c8ae98c49dbdc2f7, type: 3}
+      propertyPath: startingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 6563a6224c0011b4aab6d69728622b1d, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1465,7 +1473,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactionSlider: {fileID: 954537331}
   inventoryCenter: {fileID: 1220826394}
-  inventorySlotSpacing: 10
+  inventorySlotSpacing: 0
 --- !u!1 &530870745
 GameObject:
   m_ObjectHideFlags: 0
@@ -3446,11 +3454,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1399508352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bffd63c2ddd861845996452bf67e5b13, type: 3}
+  m_Script: {fileID: 11500000, guid: 30056f604fd044a4ebc4ff5bea178c73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 1318929107413716094, guid: 24912c833896c184c8ae98c49dbdc2f7, type: 3}
-  inventorySlotPrefab: {fileID: 4040847298079713847, guid: 166f9970c951af14dae7aa021160d54e, type: 3}
+  loadedPrefabs: {fileID: 11400000, guid: 95a20396eefedba48809cb568d3b0e0d, type: 2}
 --- !u!1001 &1402827283
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3755,6 +3762,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemPrefab (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2777089818643332705, guid: 24912c833896c184c8ae98c49dbdc2f7, type: 3}
+      propertyPath: startingData
+      value: 
+      objectReference: {fileID: 11400000, guid: f99574bdbaee7b740bf1b0f53c1b49bc, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11036,6 +11047,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 2777089818643332705, guid: 24912c833896c184c8ae98c49dbdc2f7, type: 3}
+      propertyPath: startingData
+      value: 
+      objectReference: {fileID: 11400000, guid: d6b15bad353819448b0807a3b0aa86f0, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
