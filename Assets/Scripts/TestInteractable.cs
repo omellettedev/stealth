@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TestInteractable : HeldInteractable
+public class TestInteractable : ItemSpecificHeldInteractable
 {
     private Color baseColor;
     private Renderer rend;
@@ -17,23 +17,26 @@ public class TestInteractable : HeldInteractable
         Destroy(gameObject);
     }
 
-    public override void OnLookAt()
-    {
-        base.OnLookAt();
-        rend.material.SetColor("_BaseColor", Color.white);
-    }
-
     public override void OnLookAway()
     {
         base.OnLookAway();
         rend.material.SetColor("_BaseColor", baseColor);
     }
 
-    public override void OnInteract()
+    protected override void OnValidLook()
     {
-        if (Player.Instance.HeldItem != null && Player.Instance.HeldItem.ItemName == "Wrench")
-        {
-            base.OnInteract();
-        }
+        base.OnValidLook();
+        rend.material.SetColor("_BaseColor", Color.white);
+    }
+
+    protected override void OnInvalidLook()
+    {
+        base.OnInvalidLook();
+        rend.material.SetColor("_BaseColor", baseColor);
+    }
+
+    protected override bool IsItemValid(ItemBase item)
+    {
+        return item != null;
     }
 }

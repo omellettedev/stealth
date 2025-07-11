@@ -14,5 +14,5 @@ public abstract class ItemData : ScriptableObject
     [SerializeField] private Sprite itemIcon;
     public Sprite ItemIcon => itemIcon;
 
-    public abstract Item CreateItem();
+    public abstract ItemBase CreateItem();
 }

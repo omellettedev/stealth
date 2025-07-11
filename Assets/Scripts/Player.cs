@@ -53,6 +53,9 @@ public class Player : MonoBehaviour
     [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
     public float FallTimeout = 0.15f;
 
+    [Tooltip("The player throw force")]
+    [SerializeField] private float throwForce = 10f;
+
     [Header("Dash")]
     public float dashSpeed = 15f;
     public float dashDuration = 0.25f;
@@ -164,9 +167,9 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject playerChest;
 
     // player inventory
-    private List<Item> inventory = new List<Item>();
+    private List<ItemBase> inventory = new List<ItemBase>();
     private int currentItemIndex = -1; // -1 means no item selected
-    public Item HeldItem => (currentItemIndex >= 0 && currentItemIndex < inventory.Count) ? inventory[currentItemIndex] : null;
+    public ItemBase HeldItem => (currentItemIndex >= 0 && currentItemIndex < inventory.Count) ? inventory[currentItemIndex] : null;
 
     public event Action<Sprite> PickedUpItemEvent;
     public event Action<int> LostItemEvent;
@@ -583,15 +586,32 @@ public class Player : MonoBehaviour
     void DropItem()
     {
         if (currentItemIndex == -1) return; // no item selected
+        ItemBase item = inventory[currentItemIndex];
         inventory.RemoveAt(currentItemIndex);
         LostItemEvent?.Invoke(currentItemIndex);
         currentItemIndex = -1;
+
+        GameObject itemObject = Instantiate(Manager.Instance.LoadedPrefabs.ItemPrefab, playerChest.transform.position, Quaternion.identity);
+        itemObject.GetComponent<ItemInteractable>().InitializeItem(item);
+        Vector3 throwDirection;
+        Vector3 playerChestPosition = playerChest.transform.position;
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, solidLayers) // get what a raycast from the camera hits
+            && (Vector3.Dot(transform.forward, hit.point - playerChestPosition) > 0)) // check if the hit is in front of the player
+        {
+            throwDirection = (hit.point - playerChestPosition).normalized;
+        }
+        else
+        {
+            throwDirection = CinemachineCameraTarget.transform.forward.normalized;
+        }
+        itemObject.GetComponent<Rigidbody>().AddForce(throwDirection * throwForce, ForceMode.Impulse);
     }
 
-    public void TryPickupItem(Item item)
+    public void TryPickupItem(ItemBase item)
     {
         if (inventory.Count >= maxInventorySize) return; // inventory is full
         inventory.Add(item);
-        PickedUpItemEvent?.Invoke(item.ItemIcon);
+        PickedUpItemEvent?.Invoke(item.Data.ItemIcon);
     }
 }

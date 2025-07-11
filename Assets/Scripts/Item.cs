@@ -1,20 +1,17 @@
 using UnityEngine;
 
-public abstract class Item
+public abstract class ItemBase
 {
-    private string itemName;
-    public string ItemName => itemName;
+    public abstract ItemData Data { get; }
+}
 
-    private string itemDescription;
-    public string ItemDescription => itemDescription;
+public abstract class Item<T> : ItemBase where T : ItemData
+{
+    private T _data;
+    public override ItemData Data => _data;
 
-    private Sprite itemIcon;
-    public Sprite ItemIcon => itemIcon;
-
-    public Item(string name, string description, Sprite icon)
+    public Item(T data)
     {
-        itemName = name;
-        itemDescription = description;
-        itemIcon = icon;
+        _data = data;
     }
 }

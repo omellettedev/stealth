@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class BasicItem : Item
+public class BasicItem : Item<BasicItemData>
 {
-    public BasicItem(string name, string description, Sprite icon) : base(name, description, icon)
+    public BasicItem(BasicItemData data) : base(data)
     {
         
     }
